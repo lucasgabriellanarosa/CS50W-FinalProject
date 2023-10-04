@@ -1,0 +1,43 @@
+{% extends 'anime/layout.html' %}
+
+{% block Title %}
+AnimeApp
+{% endblock %}
+
+{% block body %}
+
+    <div class="root" id="root">
+        <input type="hidden" id="animeID" value="{{animeID}}">        
+        <h2>Genres</h2>
+        <ul class="genresList list-unstyled" id="genresList">
+        </ul>
+    </div>
+
+    <script defer>
+        updateActiveNavBtn("genres")
+        fetch(`https://api.jikan.moe/v4/genres/anime`)
+        .then(response => response.json())
+        .then(genresData => {
+
+        const genresList = document.querySelector("#genresList")
+        
+        genresData.data.forEach(genre => {
+
+            let genreBtn = document.createElement("li")
+
+            genreBtn.innerHTML = `
+            <a data-genre-${genre.mal_id} class="btn btn-outline-secondary">
+            ${genre.name}
+            </a>
+            `
+
+            genresList.append(genreBtn)
+
+            document.querySelector(`[data-genre-${genre.mal_id}]`).href = `/genres/${genre.name}/${genre.mal_id}`
+            
+
+    })
+})
+    </script>
+
+{% endblock %}

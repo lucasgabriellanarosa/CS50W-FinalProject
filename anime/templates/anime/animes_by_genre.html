@@ -1,0 +1,64 @@
+{% extends 'anime/layout.html' %}
+
+{% block Title %}
+AnimeApp
+{% endblock %}
+
+{% block body %}
+
+    <div class="root" id="root">
+        <input type="hidden" id="genreID" value="{{genreID}}">        
+        <h2>{{genreName}} Animes</h2>
+        <ul class="animeList list-unstyled" id="animeList">
+        </ul>
+    </div>
+
+    <script defer>
+        updateActiveNavBtn("genres")
+
+        const genreID = document.querySelector("#genreID").value
+
+        const is_authenticated = "{{request.user.is_authenticated}}"
+
+        fetch(`https://api.jikan.moe/v4/anime?genres=${genreID}&limit=20`)
+        .then(response => response.json())
+        .then(animeData => {
+
+            // Anime Card
+            const animeList = document.querySelector("#animeList")
+
+            animeData.data.forEach(anime => {
+                animeList.innerHTML += `
+                <li data-animeCard id="${anime.mal_id}" class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0 animeCard">
+                        <div class="col-md-4" style="display: flex; justify-content:center;">
+                            <img src="${anime.images.jpg.image_url}" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                        <div class="card-body" data-animeDetails-${anime.mal_id}>
+                            <h5 class="card-title">${anime.title}</h5>
+                            <p class="card-text">Episodes: ${anime.episodes}</p>
+                            <p class="card-text"><small class="text-body-secondary">Score: ${anime.score}</small></p>
+                            <div id="btnContainer_${anime.mal_id}">
+                            </div>
+                            <a data-animeDetailsBtn-${anime.mal_id} id="${anime.mal_id}" class="btn btn-outline-info">Details</a>
+                        </div>
+                        </div>
+                    </div>
+                </li>
+                `
+                document.querySelector(`[data-animeDetailsBtn-${anime.mal_id}]`).href = `/anime_details/${anime.mal_id}`
+                
+                if(is_authenticated == "True"){
+                fetch(`/getUserRelationWithAnime/${anime.mal_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadRelationsBtns(anime.mal_id, anime.title, anime.episodes, anime.score, anime.images.jpg.image_url, data)
+                })}
+
+            });
+        })
+    
+    </script>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'anime/layout.html' %}
+
+{% block Title %}
+AnimeApp
+{% endblock %}
+
+{% block body %}
+
+    <div class="root" id="root">
+        <h2>Watchlist</h2>
+        <ul class="animeList list-unstyled">
+            {% for anime in watchlist %}
+                <li data-animeCard id={{anime.animeId}} class="card mb-3" style="max-width: 540px;">
+                    <input type="hidden" data-animeName-{{anime.animeId}} id="{{anime.animeName}}">
+                    <input type="hidden" data-animeEps-{{anime.animeId}} id={{anime.animeEps}}>
+                    <input type="hidden" data-animeScore-{{anime.animeId}} id={{anime.animeScore}}>
+                    <input type="hidden" data-animeImg-{{anime.animeId}} id="{{anime.animeImg}}">
+
+                    <div class="row g-0 animeCard">
+                        <div class="col-md-4" style="display: flex; justify-content:center;">
+                            <img src={{anime.animeImg}} class="img-fluid rounded-start">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">{{anime.animeName}}</h5>
+                                <p class="card-text">Episodes: {{anime.animeEps}}</p>
+                                <p class="card-text"><small class="text-body-secondary">Score: {{anime.animeScore}}</small></p>
+                                <div id="btnContainer_{{anime.animeId}}">
+                                </div>
+                                <a data-animeDetailsBtn-{{anime.animeId}} id="{{anime.animeId}}" class="btn btn-outline-info">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script defer>
+        updateActiveNavBtn("watchlist")
+
+        const animes = document.querySelectorAll("[data-animeCard]")
+
+        animes.forEach(animeData => {
+
+            document.querySelector(`[data-animeDetailsBtn-${animeData.id}]`).href = `/anime_details/${animeData.id}`
+        
+            const is_authenticated = "{{request.user.is_authenticated}}"
+
+            name = document.querySelector(`[data-animeName-${animeData.id}]`).id
+            eps = document.querySelector(`[data-animeEps-${animeData.id}]`).id
+            score = document.querySelector(`[data-animeScore-${animeData.id}]`).id
+            img = document.querySelector(`[data-animeImg-${animeData.id}]`).id
+
+             if(is_authenticated == "True"){
+                fetch(`/getUserRelationWithAnime/${animeData.id}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadRelationsBtns(animeData.id, name, eps, score, img, data)
+            })}
+
+        });
+
+
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'anime/layout.html' %}
+
+{% block Title %}
+AnimeApp
+{% endblock %}
+
+{% block body %}
+
+    <div class="root" id="root">
+        <h2>Popular Animes</h2>
+        <ul class="animeList list-unstyled" id="animeList">
+        </ul>
+    </div>
+    
+
+    <script defer>
+    updateActiveNavBtn("top")
+
+    const is_authenticated = "{{request.user.is_authenticated}}"
+
+    fetch(`https://api.jikan.moe/v4/top/anime?limit=16`)
+    .then(response => response.json())
+    .then(topAnimesData => {
+        const animeList = document.querySelector("#animeList")
+        topAnimesData.data.forEach(animeData => {       
+            animeList.innerHTML += `
+            <li data-animeCard id="${animeData.mal_id}" class="card mb-3" style="max-width: 540px;">
+                <div class="row g-0 animeCard">
+                    <div class="col-md-4" style="display: flex; justify-content:center;">
+                        <img src="${animeData.images.jpg.image_url}" class="img-fluid rounded-start">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">${animeData.title}</h5>
+                            <p class="card-text">Episodes: ${animeData.episodes}</p>
+                            <p class="card-text"><small class="text-body-secondary">Score: ${animeData.score}</small></p>
+                            <div id="btnContainer_${animeData.mal_id}">
+                            </div>
+                            <a data-animeDetailsBtn-${animeData.mal_id} id="${animeData.mal_id}" class="btn btn-outline-info">Details</a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            `
+            document.querySelector(`[data-animeDetailsBtn-${animeData.mal_id}]`).href = `/anime_details/${animeData.mal_id}`
+            if(is_authenticated == "True"){
+                fetch(`/getUserRelationWithAnime/${animeData.mal_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadRelationsBtns(animeData.mal_id, animeData.title, animeData.episodes, animeData.score, animeData.images.jpg.image_url, data)
+            })}
+        });
+        })
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'anime/layout.html' %}
+
+{% block Title %}
+AnimeApp
+{% endblock %}
+
+{% block body %}
+
+    <div class="root" id="root">
+        <input type="hidden" id="animeID" value="{{animeID}}">
+    </div>
+
+    <script defer>
+    const is_authenticated = "{{request.user.is_authenticated}}"
+    const animeID = document.querySelector("#animeID").value
+
+    fetch(`https://api.jikan.moe/v4/anime/${animeID}`)
+    .then(response=>response.json())
+    .then(animeData => {
+        document.querySelector("#root").innerHTML = `
+        <h2>${animeData.data.title}</h2>
+        <img src="${animeData.data.images.jpg.image_url}" style:"gap: 1rem;">
+        <div id="btnContainer_${animeData.data.mal_id}"> 
+        </div>
+        <a target="_blank" href="${animeData.data.trailer.url}" class="btn btn-outline-primary">Watch Trailer</a>
+        <h3>Synopsis</h3>
+        <p style="max-width: 600px;">${animeData.data.synopsis}</p>
+        `
+
+        if(is_authenticated == "True"){
+            fetch(`/getUserRelationWithAnime/${animeData.data.mal_id}`)
+            .then(response => response.json())
+            .then(data => {
+                loadRelationsBtns(animeData.data.mal_id, animeData.data.title, animeData.data.episodes, animeData.data.score, animeData.data.images.jpg.image_url, data)
+            })
+        }
+    })
+    </script>
+
+{% endblock %}
