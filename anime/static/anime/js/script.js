@@ -287,8 +287,3 @@ const loadAlreadyWatched = async() => {
     })
 
 }
-
-const loadProfile = async() => {
-    document.querySelector("#root").innerHTML = `
-    `
-}

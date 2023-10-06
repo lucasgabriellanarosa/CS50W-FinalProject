@@ -49,7 +49,7 @@ def register(request):
 
         # Ensure password matches confirmation
         password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
+        confirmation = request.POST["confirmation"]  
         if password != confirmation:
             return render(request, "anime/register.html", {
                 "message": "Passwords must match."
